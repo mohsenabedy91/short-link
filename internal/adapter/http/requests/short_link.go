@@ -5,5 +5,5 @@ type ShortLink struct {
 }
 
 type Redirect struct {
-	ShortPath string `uri:"shortPath" binding:"required,len=8"`
+	ShortPath string `uri:"shortPath" binding:"required"`
 }

@@ -3,7 +3,6 @@ package shortlinkrepository
 import (
 	"database/sql"
 	"errors"
-	"short-link/internal/core/domain"
 	"short-link/pkg/serviceerror"
 )
 
@@ -17,28 +16,42 @@ func NewShortLinkRepository(db *sql.DB) *ShortLinkRepository {
 	}
 }
 
-func (r *ShortLinkRepository) Save(shortLink *domain.ShortLink) error {
-	_, err := r.db.Exec("INSERT INTO short_links (path, url) VALUES ($1, $2);",
-		shortLink.Path,
-		shortLink.Url,
-	)
+func (r *ShortLinkRepository) Save(url string) (uint64, error) {
+	var id uint64
+	err := r.db.QueryRow("INSERT INTO short_links (url) VALUES ($1) RETURNING id;",
+		url,
+	).Scan(&id)
 	if err != nil {
-		return serviceerror.NewServerError()
+		return 0, serviceerror.NewServerError()
 	}
 
-	return nil
+	return id, nil
 }
 
-func (r *ShortLinkRepository) GetByShortPath(shortPath string) (*domain.ShortLink, error) {
-	var shortLink domain.ShortLink
+func (r *ShortLinkRepository) GetByID(id uint64) (string, error) {
+	var url string
 
-	err := r.db.QueryRow("SELECT url FROM short_links WHERE path = $1", shortPath).Scan(&shortLink.Url)
+	err := r.db.QueryRow("SELECT url FROM short_links WHERE id = $1", id).Scan(&url)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, serviceerror.New(serviceerror.RecordNotFound)
+			return "", serviceerror.New(serviceerror.RecordNotFound)
 		}
-		return nil, serviceerror.NewServerError()
+		return "", serviceerror.NewServerError()
 	}
 
-	return &shortLink, nil
+	return url, nil
+}
+
+func (r *ShortLinkRepository) GetByUrl(url string) (uint64, error) {
+	var id uint64
+
+	err := r.db.QueryRow("SELECT id FROM short_links WHERE url = $1", url).Scan(&id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, serviceerror.New(serviceerror.RecordNotFound)
+		}
+		return 0, serviceerror.NewServerError()
+	}
+
+	return id, nil
 }

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"short-link/internal/core/config"
-	"short-link/internal/core/domain"
 	"short-link/internal/core/port"
 	"short-link/pkg/helper"
 	"short-link/pkg/serviceerror"
@@ -23,30 +22,34 @@ func NewShortLinkService(config config.ShortLink, shortLinkRepository port.Short
 }
 
 func (r *ShortLink) Create(url string) (string, error) {
-	shortPath := helper.GenerateShortLink(url)
-
-	_, getByShortPathErr := r.shortLinkRepository.GetByShortPath(shortPath)
+	id, getByShortPathErr := r.shortLinkRepository.GetByUrl(url)
 
 	var se *serviceerror.ServiceError
-	if errors.As(getByShortPathErr, &se) && se.GetErrorMessage() == serviceerror.RecordNotFound {
-		shortLink := &domain.ShortLink{
-			Path: shortPath,
-			Url:  url,
+	if errors.As(getByShortPathErr, &se) {
+		if se.GetErrorMessage() == serviceerror.ServerError {
+			return "", getByShortPathErr
 		}
-
-		if saveErr := r.shortLinkRepository.Save(shortLink); saveErr != nil {
-			return "", saveErr
+		if se.GetErrorMessage() == serviceerror.RecordNotFound {
+			var saveErr error
+			id, saveErr = r.shortLinkRepository.Save(url)
+			if saveErr != nil {
+				return "", saveErr
+			}
 		}
 	}
+
+	shortPath := helper.IdToShortURL(id)
 
 	return fmt.Sprintf("%s/%s", r.conf.Host, shortPath), nil
 }
 
 func (r *ShortLink) GetByShortPath(shortPath string) (string, error) {
-	shortLink, err := r.shortLinkRepository.GetByShortPath(shortPath)
+	id := helper.ShortURLToID(shortPath)
+
+	shortLink, err := r.shortLinkRepository.GetByID(id)
 	if err != nil {
 		return "", err
 	}
 
-	return shortLink.Url, nil
+	return shortLink, nil
 }
