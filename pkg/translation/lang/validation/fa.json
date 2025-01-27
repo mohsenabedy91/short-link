@@ -1,0 +1,11 @@
+{
+  "validation": {
+    "required": "فیلد {{.attribute}} الزامی است.",
+    "url": "{{.attribute}} باید یک آدرس معتبر باشد.",
+    "len": "{{.attribute}} باید دقیقاً {{.len}} کاراکتر باشد."
+  },
+  "attributes": {
+    "Url": "آدرس الکترونیکی",
+    "ShortPath": "آدرس کوتاه شده"
+  }
+}

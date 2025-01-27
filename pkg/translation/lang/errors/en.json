@@ -1,0 +1,8 @@
+{
+  "errors": {
+    "serverError": "We're experiencing some technical difficulties. Please try again later.",
+    "recordNotFound": "We couldn't find the resource you requested.",
+    "noRowsEffected": "No rows were affected.",
+    "invalidRequestBody": "Oops! There's an issue with the information you provided. Please check your request and try again."
+  }
+}

@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16.3
+    container_name: postgres
+    volumes:
+      - postgres_data:/data/postgres
+    ports:
+      - "${DB_FORWARD_PORT:-5432}:5432"
+    restart: always
+    networks:
+      - default
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    driver: bridge

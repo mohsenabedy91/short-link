@@ -1,0 +1,11 @@
+{
+  "validation": {
+    "required": "Field {{.attribute}} is required.",
+    "url": "The {{.attribute}} must be a valid url address.",
+    "len": "The {{.attribute}} must be exactly {{.len}} characters long."
+  },
+  "attributes": {
+    "Url": "Url",
+    "ShortPath": "Short Path Address"
+  }
+}
